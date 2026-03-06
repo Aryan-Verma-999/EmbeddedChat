@@ -1,6 +1,11 @@
 import { create } from 'zustand';
 
-const useInviteStore = create((set) => ({
+interface InviteStoreState {
+  showInvite: boolean;
+  toggleInviteView: () => void;
+}
+
+const useInviteStore = create<InviteStoreState>((set) => ({
   showInvite: false,
   toggleInviteView: () => set((state) => ({ showInvite: !state.showInvite })),
 }));
