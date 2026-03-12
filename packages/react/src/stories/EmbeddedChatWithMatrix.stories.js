@@ -1,5 +1,22 @@
 import { EmbeddedChat } from '..';
 
+// Bypass ngrok anti-phishing warning screen for the live demo
+if (typeof window !== 'undefined') {
+  const originalFetch = window.fetch;
+  window.fetch = async (...args) => {
+    const [resource, config] = args;
+    const newConfig = {
+      ...config,
+      headers: {
+        ...(config?.headers || {}),
+        'ngrok-skip-browser-warning': '69420',
+      },
+    };
+    return originalFetch(resource, newConfig);
+  };
+}
+
+
 // Story demonstrating EmbeddedChat with Matrix federation support
 // Requires Rocket.Chat server v7.11+ with native federation enabled
 export default {
