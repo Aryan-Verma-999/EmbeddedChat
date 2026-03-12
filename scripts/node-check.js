@@ -1,6 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 
+if (process.env.VERCEL) {
+	console.log('Skipping strict Node version check on Vercel');
+	process.exit(0);
+}
+
 const nvmrcPath = path.join(__dirname, '../.nvmrc');
 const expectedVersion = fs.readFileSync(nvmrcPath).toString().trim();
 
