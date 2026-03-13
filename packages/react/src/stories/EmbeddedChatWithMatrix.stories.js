@@ -1,6 +1,6 @@
 import { EmbeddedChat } from '..';
 
-// Bypass localtunnel anti-phishing warning screen for the live demo
+// Bypass ngrok anti-phishing warning screen for the live demo
 if (typeof window !== 'undefined') {
   const originalFetch = window.fetch;
   window.fetch = async (...args) => {
@@ -9,7 +9,7 @@ if (typeof window !== 'undefined') {
       ...config,
       headers: {
         ...(config?.headers || {}),
-        'Bypass-Tunnel-Reminder': 'true',
+        'ngrok-skip-browser-warning': '69420',
       },
     };
     return originalFetch(resource, newConfig);
