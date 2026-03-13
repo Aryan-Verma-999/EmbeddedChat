@@ -147,9 +147,9 @@ const useFetchChatData = (showRoles) => {
         if (showRoles) {
           const { roles } = await RCInstance.getChannelRoles(isChannelPrivate);
           const fetchedRoles = await RCInstance.getUsersInRole('admin');
-          const fetchedAdmins = fetchedRoles?.users;
+          const fetchedAdmins = fetchedRoles?.users || [];
 
-          const adminUsernames = fetchedAdmins?.map((user) => user.username);
+          const adminUsernames = fetchedAdmins.map((user) => user.username);
           setAdmins(adminUsernames);
 
           const rolesObj =

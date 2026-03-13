@@ -198,7 +198,6 @@ export default class EmbeddedChatApi {
         }
         const message = JSON.parse(JSON.stringify(data));
         if (message.ts?.$date) {
-          console.log(message.ts?.$date);
           message.ts = message.ts.$date;
         }
         if (!message.ts) {
@@ -635,7 +634,7 @@ export default class EmbeddedChatApi {
   async getUsersInRole(role: string) {
     try {
       const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-      const roles = await fetch(
+      const rolesResponse = await fetch(
         `${this.host}/api/v1/roles.getUsersInRole?role=${role}`,
         {
           headers: {
@@ -646,9 +645,15 @@ export default class EmbeddedChatApi {
           method: "GET",
         }
       );
-      return await roles.json();
+
+      if (!rolesResponse.ok) {
+        return { users: [] };
+      }
+
+      return await rolesResponse.json();
     } catch (err) {
       console.log(err);
+      return { users: [] };
     }
   }
 
@@ -1100,9 +1105,15 @@ export default class EmbeddedChatApi {
           method: "GET",
         }
       );
+
+      if (!response.ok) {
+        return { value: 5000 }; // Default fallback
+      }
+
       return await response.json();
     } catch (err) {
       console.error(err);
+      return { value: 5000 };
     }
   }
 
