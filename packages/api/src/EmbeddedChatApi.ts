@@ -404,6 +404,7 @@ export default class EmbeddedChatApi {
             "Content-Type": "application/json",
             "X-Auth-Token": authToken,
             "X-User-Id": userId,
+            "ngrok-skip-browser-warning": "true",
           },
           method: "GET",
         }
@@ -480,6 +481,7 @@ export default class EmbeddedChatApi {
             "Content-Type": "application/json",
             "X-Auth-Token": authToken,
             "X-User-Id": userId,
+            "ngrok-skip-browser-warning": "true",
           },
           method: "GET",
         }
@@ -500,6 +502,7 @@ export default class EmbeddedChatApi {
             "Content-Type": "application/json",
             "X-Auth-Token": authToken,
             "X-User-Id": userId,
+            "ngrok-skip-browser-warning": "true",
           },
           method: "GET",
         }
@@ -549,6 +552,7 @@ export default class EmbeddedChatApi {
             "Content-Type": "application/json",
             "X-Auth-Token": authToken,
             "X-User-Id": userId,
+            "ngrok-skip-browser-warning": "true",
           },
           method: "GET",
         }
@@ -580,6 +584,7 @@ export default class EmbeddedChatApi {
             "Content-Type": "application/json",
             "X-Auth-Token": authToken,
             "X-User-Id": userId,
+            "ngrok-skip-browser-warning": "true",
           },
           method: "GET",
         }
@@ -600,6 +605,7 @@ export default class EmbeddedChatApi {
             "Content-Type": "application/json",
             "X-Auth-Token": authToken,
             "X-User-Id": userId,
+            "ngrok-skip-browser-warning": "true",
           },
           method: "GET",
         }
@@ -621,6 +627,7 @@ export default class EmbeddedChatApi {
             "Content-Type": "application/json",
             "X-Auth-Token": authToken,
             "X-User-Id": userId,
+            "ngrok-skip-browser-warning": "true",
           },
           method: "GET",
         }
@@ -641,6 +648,7 @@ export default class EmbeddedChatApi {
             "Content-Type": "application/json",
             "X-Auth-Token": authToken,
             "X-User-Id": userId,
+            "ngrok-skip-browser-warning": "true",
           },
           method: "GET",
         }
@@ -773,6 +781,7 @@ export default class EmbeddedChatApi {
             "Content-Type": "application/json",
             "X-Auth-Token": authToken,
             "X-User-Id": userId,
+            "ngrok-skip-browser-warning": "true",
           },
           method: "GET",
         }
@@ -829,6 +838,7 @@ export default class EmbeddedChatApi {
             "Content-Type": "application/json",
             "X-Auth-Token": authToken,
             "X-User-Id": userId,
+            "ngrok-skip-browser-warning": "true",
           },
           method: "GET",
         }
@@ -849,6 +859,7 @@ export default class EmbeddedChatApi {
             "Content-Type": "application/json",
             "X-Auth-Token": authToken,
             "X-User-Id": userId,
+            "ngrok-skip-browser-warning": "true",
           },
           method: "GET",
         }
@@ -869,6 +880,7 @@ export default class EmbeddedChatApi {
             "Content-Type": "application/json",
             "X-Auth-Token": authToken,
             "X-User-Id": userId,
+            "ngrok-skip-browser-warning": "true",
           },
           method: "GET",
         }
@@ -1061,6 +1073,7 @@ export default class EmbeddedChatApi {
             "Content-Type": "application/json",
             "X-Auth-Token": authToken,
             "X-User-Id": userId,
+            "ngrok-skip-browser-warning": "true",
           },
           method: "GET",
         }
@@ -1081,6 +1094,7 @@ export default class EmbeddedChatApi {
             "Content-Type": "application/json",
             "X-Auth-Token": authToken,
             "X-User-Id": userId,
+            "ngrok-skip-browser-warning": "true",
           },
           method: "GET",
         }
@@ -1101,6 +1115,7 @@ export default class EmbeddedChatApi {
             "Content-Type": "application/json",
             "X-Auth-Token": authToken,
             "X-User-Id": userId,
+            "ngrok-skip-browser-warning": "true",
           },
           method: "GET",
         }
