@@ -48,12 +48,11 @@ export default class EmbeddedChatApi {
     });
   }
   async _fetch(url: string, config: RequestInit = {}) {
+    const headers = new Headers(config.headers || {});
+    headers.set("ngrok-skip-browser-warning", "true");
     return fetch(url, {
       ...config,
-      headers: {
-        ...config.headers,
-        "ngrok-skip-browser-warning": "true",
-      },
+      headers,
     });
   }
 
