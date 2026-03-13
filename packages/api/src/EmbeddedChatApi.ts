@@ -26,7 +26,7 @@ export default class EmbeddedChatApi {
     rid: string,
     { getToken, saveToken, deleteToken }: IRocketChatAuthOptions
   ) {
-    this.host = host;
+    this.host = host.replace(/\/$/, "");
     this.rid = rid;
     this.rcClient = new Rocketchat({
       protocol: "ddp",
