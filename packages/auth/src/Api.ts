@@ -44,8 +44,12 @@ export class Api {
     if (!response.ok) {
       throw new ApiError(response, "Failed Api Request for " + endpoint);
     }
-    const jsonData = await response.json();
-    return { data: jsonData };
+    const contentType = response.headers.get("Content-Type");
+    if (contentType && contentType.includes("application/json")) {
+        const jsonData = await response.json();
+        return { data: jsonData };
+    }
+    return { data: null };
   }
 
   async post(endpoint: string, data: any, config: RequestInit = {}) {
