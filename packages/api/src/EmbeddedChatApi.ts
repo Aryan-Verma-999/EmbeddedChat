@@ -47,6 +47,15 @@ export default class EmbeddedChatApi {
       saveToken,
     });
   }
+  async _fetch(url: string, config: RequestInit = {}) {
+    return fetch(url, {
+      ...config,
+      headers: {
+        ...config.headers,
+        "ngrok-skip-browser-warning": "true",
+      },
+    });
+  }
 
   setAuth(auth: RocketChatAuth) {
     this.auth = auth;
@@ -90,7 +99,7 @@ export default class EmbeddedChatApi {
         });
 
     try {
-      const req = await fetch(`${this.host}/api/v1/login`, {
+      const req = await this._fetch(`${this.host}/api/v1/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -381,7 +390,7 @@ export default class EmbeddedChatApi {
 
   async getRCAppInfo() {
     try {
-      const response = await fetch(
+      const response = await this._fetch(
         `${this.host}/api/apps/public/${ROCKETCHAT_APP_ID}/info`
       );
 
@@ -397,7 +406,7 @@ export default class EmbeddedChatApi {
   async updateUserNameThroughSuggestion(userid: string) {
     try {
       const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-      const response = await fetch(
+      const response = await this._fetch(
         `${this.host}/api/v1/users.getUsernameSuggestion`,
         {
           headers: {
@@ -413,7 +422,7 @@ export default class EmbeddedChatApi {
       const suggestedUsername = await response.json();
 
       if (suggestedUsername.success) {
-        const response2 = await fetch(`${this.host}/api/v1/users.update`, {
+        const response2 = await this._fetch(`${this.host}/api/v1/users.update`, {
           body: JSON.stringify({
             userId: userid,
             data: { username: suggestedUsername.result },
@@ -441,7 +450,7 @@ export default class EmbeddedChatApi {
     if (usernameRegExp.test(newUserName)) {
       try {
         const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-        const response = await fetch(`${this.host}/api/v1/users.update`, {
+        const response = await this._fetch(`${this.host}/api/v1/users.update`, {
           body: JSON.stringify({
             userId: userid,
             data: { username: newUserName },
@@ -474,7 +483,7 @@ export default class EmbeddedChatApi {
   async channelInfo() {
     try {
       const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-      const response = await fetch(
+      const response = await this._fetch(
         `${this.host}/api/v1/rooms.info?roomId=${this.rid}`,
         {
           headers: {
@@ -495,7 +504,7 @@ export default class EmbeddedChatApi {
   async getRoomInfo() {
     try {
       const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-      const response = await fetch(
+      const response = await this._fetch(
         `${this.host}/api/v1/rooms.info?roomId=${this.rid}`,
         {
           headers: {
@@ -516,7 +525,7 @@ export default class EmbeddedChatApi {
   async permissionInfo() {
     try {
       const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-      const response = await fetch(`${this.host}/api/v1/permissions.listAll`, {
+      const response = await this._fetch(`${this.host}/api/v1/permissions.listAll`, {
         headers: {
           "Content-Type": "application/json",
           "X-Auth-Token": authToken,
@@ -545,7 +554,7 @@ export default class EmbeddedChatApi {
     const endp = anonymousMode ? "anonymousread" : "messages";
     try {
       const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-      const messages = await fetch(
+      const messages = await this._fetch(
         `${this.host}/api/v1/${roomType}.${endp}?roomId=${this.rid}`,
         {
           headers: {
@@ -577,7 +586,7 @@ export default class EmbeddedChatApi {
     const offset = options?.offset ? options.offset : 0;
     try {
       const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-      const messages = await fetch(
+      const messages = await this._fetch(
         `${this.host}/api/v1/${roomType}.${endp}?roomId=${this.rid}&offset=${offset}`,
         {
           headers: {
@@ -598,7 +607,7 @@ export default class EmbeddedChatApi {
   async getThreadMessages(tmid: string, isChannelPrivate = false) {
     try {
       const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-      const messages = await fetch(
+      const messages = await this._fetch(
         `${this.host}/api/v1/chat.getThreadMessages?tmid=${tmid}`,
         {
           headers: {
@@ -620,7 +629,7 @@ export default class EmbeddedChatApi {
     const roomType = isChannelPrivate ? "groups" : "channels";
     try {
       const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-      const roles = await fetch(
+      const roles = await this._fetch(
         `${this.host}/api/v1/${roomType}.roles?roomId=${this.rid}`,
         {
           headers: {
@@ -641,7 +650,7 @@ export default class EmbeddedChatApi {
   async getUsersInRole(role: string) {
     try {
       const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-      const rolesResponse = await fetch(
+      const rolesResponse = await this._fetch(
         `${this.host}/api/v1/roles.getUsersInRole?role=${role}`,
         {
           headers: {
@@ -698,7 +707,7 @@ export default class EmbeddedChatApi {
     }
     try {
       const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-      const response = await fetch(`${this.host}/api/v1/chat.sendMessage`, {
+      const response = await this._fetch(`${this.host}/api/v1/chat.sendMessage`, {
         body: JSON.stringify({ message: messageObj }),
         headers: {
           "Content-Type": "application/json",
@@ -716,7 +725,7 @@ export default class EmbeddedChatApi {
   async deleteMessage(msgId: string) {
     try {
       const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-      const response = await fetch(`${this.host}/api/v1/chat.delete`, {
+      const response = await this._fetch(`${this.host}/api/v1/chat.delete`, {
         body: JSON.stringify({ roomId: this.rid, msgId }),
         headers: {
           "Content-Type": "application/json",
@@ -734,7 +743,7 @@ export default class EmbeddedChatApi {
   async updateMessage(msgId: string, text: string) {
     try {
       const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-      const response = await fetch(`${this.host}/api/v1/chat.update`, {
+      const response = await this._fetch(`${this.host}/api/v1/chat.update`, {
         body: JSON.stringify({ roomId: this.rid, msgId, text }),
         headers: {
           "Content-Type": "application/json",
@@ -757,7 +766,7 @@ export default class EmbeddedChatApi {
         typeGroup === ""
           ? `${this.host}/api/v1/${roomType}.files?roomId=${this.rid}`
           : `${this.host}/api/v1/${roomType}.files?roomId=${this.rid}&typeGroup=${typeGroup}`;
-      const response = await fetch(url, {
+      const response = await this._fetch(url, {
         headers: {
           "Content-Type": "application/json",
           "X-Auth-Token": authToken,
@@ -774,7 +783,7 @@ export default class EmbeddedChatApi {
   async getAllImages() {
     try {
       const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-      const response = await fetch(
+      const response = await this._fetch(
         `${this.host}/api/v1/rooms.images?roomId=${this.rid}`,
         {
           headers: {
@@ -795,7 +804,7 @@ export default class EmbeddedChatApi {
   async starMessage(mid: string) {
     try {
       const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-      const response = await fetch(`${this.host}/api/v1/chat.starMessage`, {
+      const response = await this._fetch(`${this.host}/api/v1/chat.starMessage`, {
         body: JSON.stringify({ messageId: mid }),
         headers: {
           "Content-Type": "application/json",
@@ -813,7 +822,7 @@ export default class EmbeddedChatApi {
   async unstarMessage(mid: string) {
     try {
       const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-      const response = await fetch(`${this.host}/api/v1/chat.unStarMessage`, {
+      const response = await this._fetch(`${this.host}/api/v1/chat.unStarMessage`, {
         body: JSON.stringify({ messageId: mid }),
         headers: {
           "Content-Type": "application/json",
@@ -831,7 +840,7 @@ export default class EmbeddedChatApi {
   async getStarredMessages() {
     try {
       const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-      const response = await fetch(
+      const response = await this._fetch(
         `${this.host}/api/v1/chat.getStarredMessages?roomId=${this.rid}`,
         {
           headers: {
@@ -852,7 +861,7 @@ export default class EmbeddedChatApi {
   async getPinnedMessages() {
     try {
       const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-      const response = await fetch(
+      const response = await this._fetch(
         `${this.host}/api/v1/chat.getPinnedMessages?roomId=${this.rid}`,
         {
           headers: {
@@ -873,7 +882,7 @@ export default class EmbeddedChatApi {
   async getMentionedMessages() {
     try {
       const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-      const response = await fetch(
+      const response = await this._fetch(
         `${this.host}/api/v1/chat.getMentionedMessages?roomId=${this.rid}`,
         {
           headers: {
@@ -894,7 +903,7 @@ export default class EmbeddedChatApi {
   async pinMessage(mid: string) {
     try {
       const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-      const response = await fetch(`${this.host}/api/v1/chat.pinMessage`, {
+      const response = await this._fetch(`${this.host}/api/v1/chat.pinMessage`, {
         body: JSON.stringify({ messageId: mid }),
         headers: {
           "Content-Type": "application/json",
@@ -914,7 +923,7 @@ export default class EmbeddedChatApi {
   async unpinMessage(mid: string) {
     try {
       const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-      const response = await fetch(`${this.host}/api/v1/chat.unPinMessage`, {
+      const response = await this._fetch(`${this.host}/api/v1/chat.unPinMessage`, {
         body: JSON.stringify({ messageId: mid }),
         headers: {
           "Content-Type": "application/json",
@@ -932,7 +941,7 @@ export default class EmbeddedChatApi {
   async reactToMessage(emoji: string, messageId: string, shouldReact: string) {
     try {
       const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-      const response = await fetch(`${this.host}/api/v1/chat.react`, {
+      const response = await this._fetch(`${this.host}/api/v1/chat.react`, {
         body: JSON.stringify({
           messageId,
           emoji,
@@ -954,7 +963,7 @@ export default class EmbeddedChatApi {
   async reportMessage(messageId: string, description: string) {
     try {
       const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-      const response = await fetch(`${this.host}/api/v1/chat.reportMessage`, {
+      const response = await this._fetch(`${this.host}/api/v1/chat.reportMessage`, {
         body: JSON.stringify({ messageId, description }),
         headers: {
           "Content-Type": "application/json",
@@ -972,7 +981,7 @@ export default class EmbeddedChatApi {
   async findOrCreateInvite() {
     try {
       const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-      const response = await fetch(`${this.host}/api/v1/findOrCreateInvite`, {
+      const response = await this._fetch(`${this.host}/api/v1/findOrCreateInvite`, {
         method: "POST",
         body: JSON.stringify({ rid: this.rid, days: 1, maxUses: 10 }),
         headers: {
@@ -1006,7 +1015,7 @@ export default class EmbeddedChatApi {
         form.append("description", fileDescription);
       }
 
-      const uploadResponse = await fetch(
+      const uploadResponse = await this._fetch(
         `${this.host}/api/v1/rooms.media/${this.rid}`,
         {
           method: "POST",
@@ -1028,7 +1037,7 @@ export default class EmbeddedChatApi {
         confirmBody.tmid = threadId;
       }
 
-      const confirmResponse = await fetch(
+      const confirmResponse = await this._fetch(
         `${this.host}/api/v1/rooms.mediaConfirm/${this.rid}/${uploadResult.file._id}`,
         {
           method: "POST",
@@ -1048,7 +1057,7 @@ export default class EmbeddedChatApi {
   async me() {
     try {
       const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-      const response = await fetch(`${this.host}/api/v1/me`, {
+      const response = await this._fetch(`${this.host}/api/v1/me`, {
         headers: {
           "Content-Type": "application/json",
           "X-Auth-Token": authToken,
@@ -1066,7 +1075,7 @@ export default class EmbeddedChatApi {
     const roomType = isChannelPrivate ? "groups" : "channels";
     try {
       const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-      const response = await fetch(
+      const response = await this._fetch(
         `${this.host}/api/v1/${roomType}.members?roomId=${this.rid}`,
         {
           headers: {
@@ -1087,7 +1096,7 @@ export default class EmbeddedChatApi {
   async getSearchMessages(text: string) {
     try {
       const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-      const response = await fetch(
+      const response = await this._fetch(
         `${this.host}/api/v1/chat.search?roomId=${this.rid}&searchText=${text}`,
         {
           headers: {
@@ -1108,7 +1117,7 @@ export default class EmbeddedChatApi {
   async getMessageLimit() {
     try {
       const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-      const response = await fetch(
+      const response = await this._fetch(
         `${this.host}/api/v1/settings/Message_MaxAllowedSize`,
         {
           headers: {
@@ -1138,7 +1147,7 @@ export default class EmbeddedChatApi {
 
       const triggerId = Math.random().toString(32).slice(2, 16);
 
-      const response = await fetch(
+      const response = await this._fetch(
         `${this.host}/api/apps/ui.interaction/${appId}`,
         {
           headers: {
@@ -1164,7 +1173,7 @@ export default class EmbeddedChatApi {
 
   async getCommandsList() {
     const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-    const response = await fetch(`${this.host}/api/v1/commands.list`, {
+    const response = await this._fetch(`${this.host}/api/v1/commands.list`, {
       headers: {
         "Content-Type": "application/json",
         "X-Auth-Token": authToken,
@@ -1186,7 +1195,7 @@ export default class EmbeddedChatApi {
     tmid?: string;
   }) {
     const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-    const response = await fetch(`${this.host}/api/v1/commands.run`, {
+    const response = await this._fetch(`${this.host}/api/v1/commands.run`, {
       headers: {
         "Content-Type": "application/json",
         "X-Auth-Token": authToken,
@@ -1207,7 +1216,7 @@ export default class EmbeddedChatApi {
 
   async getUserStatus(reqUserId: string) {
     const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-    const response = await fetch(
+    const response = await this._fetch(
       `${this.host}/api/v1/users.getStatus?userId=${reqUserId}`,
       {
         method: "GET",
@@ -1224,7 +1233,7 @@ export default class EmbeddedChatApi {
 
   async userInfo(reqUserId: string) {
     const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-    const response = await fetch(
+    const response = await this._fetch(
       `${this.host}/api/v1/users.info?userId=${reqUserId}`,
       {
         method: "GET",
@@ -1241,7 +1250,7 @@ export default class EmbeddedChatApi {
 
   async userData(username: string) {
     const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
-    const response = await fetch(
+    const response = await this._fetch(
       `${this.host}/api/v1/users.info?username=${username}`,
       {
         method: "GET",
