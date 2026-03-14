@@ -186,12 +186,47 @@ export default class EmbeddedChatApi {
    * All subscriptions are implemented here.
    * TODO: Add logic to call thread message event listeners. To be done after thread implementation
    */
-  async connect() {
+  /**
+   * Ensure the authenticated user is a proper room member via the REST API.
+   * This is critical for federated rooms — without a real Subscriptions record,
+   * the afterJoinRoom hook never fires and Matrix never gets a join event for
+   * the user, causing all outbound messages to be rejected with 403 Forbidden.
+   * Errors are silently swallowed (e.g. user already a member, or anonymous mode).
+   */
+  async joinRoom(isChannelPrivate = false) {
+    try {
+      const { userId, authToken } = (await this.auth.getCurrentUser()) || {};
+      if (!userId || !authToken) return;
+      const roomType = isChannelPrivate ? "groups" : "channels";
+      await fetch(`${this.host}/api/v1/${roomType}.join`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Auth-Token": authToken,
+          "X-User-Id": userId,
+        },
+        body: JSON.stringify({ roomId: this.rid }),
+      });
+    } catch (err) {
+      // Non-fatal: user may already be a member or room may not require joining
+      console.debug("[EmbeddedChat] joinRoom skipped:", err);
+    }
+  }
+
+  /**
+   * All subscriptions are implemented here.
+   * TODO: Add logic to call thread message event listeners. To be done after thread implementation
+   */
+  async connect(isChannelPrivate = false) {
     try {
       await this.close(); // before connection, all previous subscriptions should be cancelled
       await this.rcClient.connect({});
       const token = (await this.auth.getCurrentUser())?.authToken;
       await this.rcClient.resume({ token });
+      // Ensure user has a real room membership (not just a DDP subscription).
+      // This triggers the afterJoinRoom federation hook on the server, which
+      // registers the user on Matrix so outbound messages can be bridged.
+      await this.joinRoom(isChannelPrivate);
       await this.rcClient.subscribeRoom(this.rid);
       await this.rcClient.onMessage((data: any) => {
         if (!data) {
