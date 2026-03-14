@@ -19,7 +19,6 @@ export class Api {
   getFetchConfig = (config: RequestInit) => {
     const headers = {
       "Content-Type": "application/json",
-      "ngrok-skip-browser-warning": "true",
       ...(config?.headers || {}),
     };
     const requestInit: RequestInit = {
