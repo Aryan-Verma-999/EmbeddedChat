@@ -47,7 +47,6 @@ export default class EmbeddedChatApi {
       saveToken,
     });
   }
-  }
 
   setAuth(auth: RocketChatAuth) {
     this.auth = auth;
