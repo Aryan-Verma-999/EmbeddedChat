@@ -60,6 +60,12 @@ const EmbeddedChat = (props) => {
     remoteOpt = false,
   } = config;
 
+  // aiAdapter is read directly from props (not from config state) to avoid
+  // an infinite re-render loop: putting a non-serializable object (with
+  // functions) through the config state causes useEffect([props]) to always
+  // fire and setConfig to trigger another render.
+  const aiAdapter = props.aiAdapter ?? null;
+
   const hasMounted = useRef(false);
   const { classNames, styleOverrides } = useComponentOverrides('EmbeddedChat');
   const [fullScreen, setFullScreen] = useState(false);
@@ -182,6 +188,8 @@ const EmbeddedChat = (props) => {
     }
   }, [RCInstance, remoteOpt, setConfig, setIsSynced]);
 
+  const memoizedAiAdapter = useMemo(() => aiAdapter, [aiAdapter]);
+
   const ECOptions = useMemo(
     () => ({
       enableThreads,
@@ -198,6 +206,7 @@ const EmbeddedChat = (props) => {
       showUsername,
       hideHeader,
       anonymousMode,
+      aiAdapter: memoizedAiAdapter,
     }),
     [
       enableThreads,
@@ -214,6 +223,7 @@ const EmbeddedChat = (props) => {
       showUsername,
       hideHeader,
       anonymousMode,
+      memoizedAiAdapter,
     ]
   );
 
@@ -288,6 +298,11 @@ EmbeddedChat.propTypes = {
   style: PropTypes.object,
   hideHeader: PropTypes.bool,
   dark: PropTypes.bool,
+  aiAdapter: PropTypes.shape({
+    sendPrompt: PropTypes.func.isRequired,
+    getSuggestions: PropTypes.func,
+    isAvailable: PropTypes.func.isRequired,
+  }),
 };
 
 export default memo(EmbeddedChat);

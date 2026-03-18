@@ -38,6 +38,7 @@ import { parseEmoji } from '../../lib/emoji';
 const ChatInput = ({ scrollToBottom, clearUnreadDividerRef }) => {
   const { styleOverrides, classNames } = useComponentOverrides('ChatInput');
   const { RCInstance, ECOptions } = useRCContext();
+  const aiAdapter = ECOptions?.aiAdapter ?? null;
   const { theme } = useTheme();
   const styles = getChatInputStyles(theme);
 
@@ -57,6 +58,11 @@ const ChatInput = ({ scrollToBottom, clearUnreadDividerRef }) => {
   const [showCommandList, setShowCommandList] = useState(false);
   const [filteredCommands, setFilteredCommands] = useState([]);
   const [isMsgLong, setIsMsgLong] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState([]);
+  const [isFetchingSuggestions, setIsFetchingSuggestions] = useState(false);
+  const [summary, setSummary] = useState('');
+  const [showSummary, setShowSummary] = useState(false);
+  const [isSummarizing, setIsSummarizing] = useState(false);
 
   const {
     isUserAuthenticated,
@@ -398,9 +404,57 @@ const ChatInput = ({ scrollToBottom, clearUnreadDividerRef }) => {
 
     handleSendNewMessage(message);
     scrollToBottom();
+    setAiSuggestions([]);
     // Clear unread divider when user sends a message
     if (clearUnreadDividerRef?.current) {
       clearUnreadDividerRef.current();
+    }
+  };
+
+  // Clear AI state on logout
+  useEffect(() => {
+    if (!isUserAuthenticated) {
+      setAiSuggestions([]);
+      setSummary('');
+      setShowSummary(false);
+    }
+  }, [isUserAuthenticated]);
+
+  const handleGetSuggestions = async () => {
+    if (!aiAdapter || isFetchingSuggestions) return;
+    setIsFetchingSuggestions(true);
+    try {
+      const { messages } = useMessageStore.getState();
+      const suggestions = aiAdapter.getSuggestions
+        ? await aiAdapter.getSuggestions(messages.slice(-10))
+        : [];
+      setAiSuggestions(suggestions);
+    } catch (e) {
+      console.error('[AI Adapter] getSuggestions failed:', e);
+    } finally {
+      setIsFetchingSuggestions(false);
+    }
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    messageRef.current.value = suggestion;
+    setDisableButton(false);
+    setAiSuggestions([]);
+    messageRef.current.focus();
+  };
+
+  const handleSummarize = async () => {
+    if (!aiAdapter?.summarize || isSummarizing) return;
+    setIsSummarizing(true);
+    try {
+      const { messages } = useMessageStore.getState();
+      const result = await aiAdapter.summarize(messages);
+      setSummary(result);
+      setShowSummary(true);
+    } catch (e) {
+      console.error('[AI Adapter] summarize failed:', e);
+    } finally {
+      setIsSummarizing(false);
     }
   };
 
@@ -589,8 +643,36 @@ const ChatInput = ({ scrollToBottom, clearUnreadDividerRef }) => {
 
         <TypingUsers />
       </Box>
-      <Box
-        ref={chatInputContainer}
+      {aiSuggestions.length > 0 && (
+          <Box
+            css={css`
+              display: flex;
+              flex-wrap: wrap;
+              gap: 0.4rem;
+              padding: 0.4rem 1rem 0;
+            `}
+          >
+            {aiSuggestions.map((s) => (
+              <Button
+                key={s}
+                size="small"
+                type="secondary"
+                onClick={() => handleSuggestionClick(s)}
+                css={css`
+                  font-size: 0.8rem;
+                  padding: 0.2rem 0.6rem;
+                  border-radius: 1rem;
+                  cursor: pointer;
+                `}
+              >
+                {s}
+              </Button>
+            ))}
+          </Box>
+        )}
+        <Box
+          ref={chatInputContainer}
+
         css={[
           styles.inputWithFormattingBox,
           (editMessage.msg || editMessage.attachments) && styles.editMessage,
@@ -637,6 +719,34 @@ const ChatInput = ({ scrollToBottom, clearUnreadDividerRef }) => {
               padding: 0.25rem;
             `}
           >
+            {aiAdapter && isUserAuthenticated && !isChannelArchived && (
+              <ActionButton
+                ghost
+                size="large"
+                onClick={handleGetSuggestions}
+                disabled={isFetchingSuggestions}
+                title="Get AI suggestions"
+                css={css`
+                  font-size: 1rem;
+                `}
+              >
+                ✨
+              </ActionButton>
+            )}
+            {aiAdapter?.summarize && isUserAuthenticated && !isChannelArchived && (
+              <ActionButton
+                ghost
+                size="large"
+                onClick={handleSummarize}
+                disabled={isSummarizing}
+                title="Summarize chat"
+                css={css`
+                  font-size: 1rem;
+                `}
+              >
+                {isSummarizing ? '⏳' : '📝'}
+              </ActionButton>
+            )}
             {isUserAuthenticated ? (
               !isChannelArchived ? (
                 <ActionButton
@@ -663,6 +773,35 @@ const ChatInput = ({ scrollToBottom, clearUnreadDividerRef }) => {
           />
         )}
       </Box>
+      {showSummary && (
+        <Modal
+          css={css`
+            padding: 1em;
+          `}
+          onClose={() => setShowSummary(false)}
+        >
+          <Modal.Header>
+            <Modal.Title>
+              📝 Chat Summary
+            </Modal.Title>
+            <Modal.Close onClick={() => setShowSummary(false)} />
+          </Modal.Header>
+          <Modal.Content
+            css={css`
+              margin: 1em;
+              white-space: pre-wrap;
+              line-height: 1.6;
+            `}
+          >
+            {summary}
+          </Modal.Content>
+          <Modal.Footer>
+            <Button type="primary" onClick={() => setShowSummary(false)}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      )}
       {isMsgLong && (
         <Modal
           css={css`
