@@ -85,7 +85,7 @@ export const WithAIAdapter = {
     React.createElement(EmbeddedChat, { ...args, aiAdapter: loaded.adapter }),
   args: {
     host: process.env.STORYBOOK_RC_HOST || 'http://localhost:3000',
-    roomId: process.env.RC_ROOM_ID || 'GENERAL',
+    roomId: process.env.RC_ROOM_ID || '69bc6262ea3e60ec913c3ab2',
     channelName: 'general',
     anonymousMode: false,
     toastBarPosition: 'bottom right',
