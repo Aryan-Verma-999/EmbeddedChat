@@ -225,15 +225,8 @@ const ChatBody = ({
           const olderMessages = await RCInstance.getOlderMessages(
             anonymousMode,
             ECOptions?.enableThreads
-              ? {
-                  query: {
-                    tmid: {
-                      $exists: false,
-                    },
-                  },
-                  offset,
-                }
-              : undefined,
+              ? { enableThreads: true, offset }
+              : { offset },
             anonymousMode ? false : isChannelPrivate
           );
           const messageList = messageListRef.current;

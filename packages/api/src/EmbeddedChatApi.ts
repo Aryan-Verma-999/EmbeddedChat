@@ -113,39 +113,26 @@ export default class EmbeddedChatApi {
    */
   async googleSSOLogin(signIn: Function, acsCode: string) {
     const tokens = await signIn();
-    let acsPayload = null;
+    const acsPayload = typeof acsCode === "string" ? acsCode : null;
 
-    if (typeof acsCode === "string") {
-      acsPayload = acsCode;
-    }
-
-    const payload = acsCode
-      ? JSON.stringify({
+    const body = acsCode
+      ? {
           serviceName: "google",
           accessToken: tokens.access_token,
           idToken: tokens.id_token,
           expiresIn: 3600,
-          totp: {
-            code: acsPayload,
-          },
-        })
-      : JSON.stringify({
+          totp: { code: acsPayload },
+        }
+      : {
           serviceName: "google",
           accessToken: tokens.access_token,
           idToken: tokens.id_token,
           expiresIn: 3600,
           scope: "profile",
-        });
+        };
 
     try {
-      const req = await fetch(`${this.host}/api/v1/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: payload,
-      });
-      const response = await req.json();
+      const response = await this._restRequest("/v1/login", "POST", body);
 
       if (response.status === "success") {
         if (!response.data.me.username) {
@@ -459,17 +446,10 @@ export default class EmbeddedChatApi {
 
   async getRCAppInfo() {
     try {
-      const response = await fetch(
-        `${this.host}/api/apps/public/${ROCKETCHAT_APP_ID}/info`
-      );
-
-      if (!response.ok) {
-        return null;
-      }
-      return await response.json();
+      return await this._restRequest(`/apps/public/${ROCKETCHAT_APP_ID}/info`);
     } catch (err: any) {
       console.error(err instanceof Error ? err.message : err);
-      return err;
+      return null;
     }
   }
 
@@ -546,33 +526,34 @@ export default class EmbeddedChatApi {
 
   /**
    * @param {boolean} anonymousMode
-   * @param {Object} options This object should include query or fields.
-   * query - json object which accepts MongoDB query operators.
-   * fields - json object with properties that have either 1 or 0 to include them or exclude them
+   * @param {Object} options
+   * enableThreads - when true, exclude thread reply messages (tmid exists) from results
    * @returns messages
    */
   async getMessages(
     anonymousMode = false,
     options: {
-      query?: object | undefined;
-      field?: object | undefined;
-    } = {
-      query: undefined,
-      field: undefined,
-    },
+      enableThreads?: boolean;
+    } = {},
     isChannelPrivate = false
   ) {
+    if (anonymousMode) {
+      const roomType = isChannelPrivate ? "groups" : "channels";
+      try {
+        return await this._restRequest(
+          `/v1/${roomType}.anonymousread?roomId=${this.rid}`
+        );
+      } catch (err: any) {
+        console.error(err instanceof Error ? err.message : err);
+        return err;
+      }
+    }
+
     const roomType = isChannelPrivate ? "groups" : "channels";
-    const endp = anonymousMode ? "anonymousread" : "messages";
-    const query = options?.query
-      ? `&query=${JSON.stringify(options.query)}`
-      : "";
-    const field = options?.field
-      ? `&field=${JSON.stringify(options.field)}`
-      : "";
+    const showThreadMessages = options?.enableThreads === true ? false : true;
     try {
       return await this._restRequest(
-        `/v1/${roomType}.${endp}?roomId=${this.rid}${query}${field}`
+        `/v1/${roomType}.history?roomId=${this.rid}&showThreadMessages=${showThreadMessages}`
       );
     } catch (err: any) {
       console.error(err instanceof Error ? err.message : err);
@@ -583,28 +564,32 @@ export default class EmbeddedChatApi {
   async getOlderMessages(
     anonymousMode = false,
     options: {
-      query?: object | undefined;
-      field?: object | undefined;
+      enableThreads?: boolean;
       offset?: number;
     } = {
-      query: undefined,
-      field: undefined,
       offset: 50,
     },
     isChannelPrivate = false
   ) {
+    const offset = options?.offset ?? 0;
+
+    if (anonymousMode) {
+      const roomType = isChannelPrivate ? "groups" : "channels";
+      try {
+        return await this._restRequest(
+          `/v1/${roomType}.anonymousread?roomId=${this.rid}&offset=${offset}`
+        );
+      } catch (err: any) {
+        console.error(err instanceof Error ? err.message : String(err));
+        return err;
+      }
+    }
+
     const roomType = isChannelPrivate ? "groups" : "channels";
-    const endp = anonymousMode ? "anonymousread" : "messages";
-    const query = options?.query
-      ? `&query=${JSON.stringify(options.query)}`
-      : "";
-    const field = options?.field
-      ? `&field=${JSON.stringify(options.field)}`
-      : "";
-    const offset = options?.offset ? options.offset : 0;
+    const showThreadMessages = options?.enableThreads === true ? false : true;
     try {
       return await this._restRequest(
-        `/v1/${roomType}.${endp}?roomId=${this.rid}${query}${field}&offset=${offset}`
+        `/v1/${roomType}.history?roomId=${this.rid}&offset=${offset}&showThreadMessages=${showThreadMessages}`
       );
     } catch (err: any) {
       console.error(err instanceof Error ? err.message : String(err));
@@ -625,10 +610,9 @@ export default class EmbeddedChatApi {
   }
 
   async getChannelRoles(isChannelPrivate = false) {
-    const roomType = isChannelPrivate ? "groups" : "channels";
     try {
       return await this._restRequest(
-        `/v1/${roomType}.roles?roomId=${this.rid}`
+        `/v1/rooms.roles?rid=${this.rid}`
       );
     } catch (err: any) {
       console.error(err instanceof Error ? err.message : String(err));
@@ -912,9 +896,7 @@ export default class EmbeddedChatApi {
   async getChannelMembers(isChannelPrivate = false) {
     const roomType = isChannelPrivate ? "groups" : "channels";
     try {
-      return await this._restRequest(
-        `/v1/${roomType}.members?roomId=${this.rid}`
-      );
+      return await this._restRequest(`/v1/${roomType}.members?roomId=${this.rid}`);
     } catch (err: any) {
       console.error(err instanceof Error ? err.message : err);
       return err;

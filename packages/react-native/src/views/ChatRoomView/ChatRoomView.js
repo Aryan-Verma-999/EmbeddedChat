@@ -29,15 +29,7 @@ const ChatRoomView = () => {
 				}
 				const { messages } = await RCInstance.getMessages(
 					anonymousMode,
-					ECOptions?.enableThreads
-						? {
-								query: {
-									tmid: {
-										$exists: false,
-									},
-								},
-							}
-						: undefined
+					ECOptions?.enableThreads ? { enableThreads: true } : undefined
 				);
 				if (messages) {
 					setMessages(
