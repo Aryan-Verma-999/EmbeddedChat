@@ -611,9 +611,7 @@ export default class EmbeddedChatApi {
 
   async getChannelRoles(isChannelPrivate = false) {
     try {
-      return await this._restRequest(
-        `/v1/rooms.roles?rid=${this.rid}`
-      );
+      return await this._restRequest(`/v1/rooms.roles?rid=${this.rid}`);
     } catch (err: any) {
       console.error(err instanceof Error ? err.message : String(err));
       return err;
@@ -896,7 +894,9 @@ export default class EmbeddedChatApi {
   async getChannelMembers(isChannelPrivate = false) {
     const roomType = isChannelPrivate ? "groups" : "channels";
     try {
-      return await this._restRequest(`/v1/${roomType}.members?roomId=${this.rid}`);
+      return await this._restRequest(
+        `/v1/${roomType}.members?roomId=${this.rid}`
+      );
     } catch (err: any) {
       console.error(err instanceof Error ? err.message : err);
       return err;
