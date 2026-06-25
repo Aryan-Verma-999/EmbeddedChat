@@ -58,6 +58,7 @@ const EmbeddedChat = (props) => {
     secure = false,
     dark = false,
     remoteOpt = false,
+    aiAutoReply = false,
   } = config;
 
   const auth = useMemo(
@@ -65,6 +66,8 @@ const EmbeddedChat = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [authProp?.flow, authProp?.credentials]
   );
+
+  const aiAdapter = props.aiAdapter ?? null;
 
   const hasMounted = useRef(false);
   const { classNames, styleOverrides } = useComponentOverrides('EmbeddedChat');
@@ -227,6 +230,8 @@ const EmbeddedChat = (props) => {
     }
   }, [RCInstance, remoteOpt, setIsSynced]);
 
+  const memoizedAiAdapter = useMemo(() => aiAdapter, [aiAdapter]);
+
   const ECOptions = useMemo(
     () => ({
       enableThreads,
@@ -243,6 +248,8 @@ const EmbeddedChat = (props) => {
       showUsername,
       hideHeader,
       anonymousMode,
+      aiAdapter: memoizedAiAdapter,
+      aiAutoReply,
     }),
     [
       enableThreads,
@@ -259,6 +266,8 @@ const EmbeddedChat = (props) => {
       showUsername,
       hideHeader,
       anonymousMode,
+      memoizedAiAdapter,
+      aiAutoReply,
     ]
   );
 
@@ -333,6 +342,14 @@ EmbeddedChat.propTypes = {
   style: PropTypes.object,
   hideHeader: PropTypes.bool,
   dark: PropTypes.bool,
+  aiAdapter: PropTypes.shape({
+    name: PropTypes.string,
+    sendPrompt: PropTypes.func.isRequired,
+    getSuggestions: PropTypes.func,
+    summarize: PropTypes.func,
+    isAvailable: PropTypes.func.isRequired,
+  }),
+  aiAutoReply: PropTypes.bool,
 };
 
 export default memo(EmbeddedChat);
