@@ -19,6 +19,7 @@ import {
   useLoginStore,
   useChannelStore,
   useMemberStore,
+  useAiStore,
 } from '../../store';
 import ChatInputFormattingToolbar from './ChatInputFormattingToolbar';
 import useAttachmentWindowStore from '../../store/attachmentwindow';
@@ -37,6 +38,8 @@ import useSearchEmoji from '../../hooks/useSearchEmoji';
 import formatSelection from '../../lib/formatSelection';
 import { parseEmoji } from '../../lib/emoji';
 import useDropBox from '../../hooks/useDropBox';
+import useAIComposer from '../../hooks/useAIComposer';
+import AIComposerToolbar from '../AIComposerToolbar';
 
 const ChatInput = ({ scrollToBottom, clearUnreadDividerRef }) => {
   const { styleOverrides, classNames } = useComponentOverrides('ChatInput');
@@ -71,6 +74,20 @@ const ChatInput = ({ scrollToBottom, clearUnreadDividerRef }) => {
   const [showSummary, setShowSummary] = useState(false);
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [isAiAvailable, setIsAiAvailable] = useState(false);
+
+  const {
+    isAiTyping,
+    setIsAiTyping,
+    threadSummary,
+    showThreadSummary,
+    closeThreadSummary,
+  } = useAiStore((state) => ({
+    isAiTyping: state.isAiTyping,
+    setIsAiTyping: state.setIsAiTyping,
+    threadSummary: state.threadSummary,
+    showThreadSummary: state.showThreadSummary,
+    closeThreadSummary: state.closeThreadSummary,
+  }));
 
   const {
     isUserAuthenticated,
@@ -424,6 +441,14 @@ const ChatInput = ({ scrollToBottom, clearUnreadDividerRef }) => {
     }
   };
 
+  const aiComposer = useAIComposer({
+    aiAdapter,
+    ECOptions,
+    userId,
+    messageRef,
+    messages: useMessageStore.getState().messages,
+  });
+
   const sendMessage = async () => {
     messageRef.current.focus();
     messageRef.current.style.height = '44px';
@@ -454,6 +479,7 @@ const ChatInput = ({ scrollToBottom, clearUnreadDividerRef }) => {
     handleSendNewMessage(message);
     scrollToBottom();
     setAiSuggestions([]);
+    aiComposer.rejectSuggestion(); // dismiss any pending AI suggestion
     // Clear unread divider when user sends a message
     if (clearUnreadDividerRef?.current) {
       clearUnreadDividerRef.current();
@@ -471,6 +497,7 @@ const ChatInput = ({ scrollToBottom, clearUnreadDividerRef }) => {
   const handleGetSuggestions = async () => {
     if (!aiAdapter || isFetchingSuggestions) return;
     setIsFetchingSuggestions(true);
+    setIsAiTyping(true);
     try {
       const { messages } = useMessageStore.getState();
       const aiContext = {
@@ -490,6 +517,7 @@ const ChatInput = ({ scrollToBottom, clearUnreadDividerRef }) => {
       });
     } finally {
       setIsFetchingSuggestions(false);
+      setIsAiTyping(false);
     }
   };
 
@@ -503,6 +531,7 @@ const ChatInput = ({ scrollToBottom, clearUnreadDividerRef }) => {
   const handleSummarize = async () => {
     if (!aiAdapter?.summarize || isSummarizing) return;
     setIsSummarizing(true);
+    setIsAiTyping(true);
     try {
       const { messages } = useMessageStore.getState();
       const result = await aiAdapter.summarize(messages, {
@@ -520,6 +549,7 @@ const ChatInput = ({ scrollToBottom, clearUnreadDividerRef }) => {
       });
     } finally {
       setIsSummarizing(false);
+      setIsAiTyping(false);
     }
   };
 
@@ -536,7 +566,6 @@ const ChatInput = ({ scrollToBottom, clearUnreadDividerRef }) => {
     sendTypingStart();
     const message = val || e.target.value;
 
-    // Don't parse emojis if user is currently typing emoji autocomplete
     const shouldParseEmoji = !message.match(/:([a-zA-Z0-9_+-]*?)$/);
     messageRef.current.value = shouldParseEmoji ? parseEmoji(message) : message;
 
@@ -757,8 +786,21 @@ const ChatInput = ({ scrollToBottom, clearUnreadDividerRef }) => {
           />
         )}
 
-        <TypingUsers />
+        <TypingUsers extraUsers={isAiTyping ? [aiAdapter?.name ?? 'AI'] : []} />
       </Box>
+      {/* AI Composer Toolbar — selection-based actions */}
+      {isAiAvailable && isUserAuthenticated && (
+        <AIComposerToolbar
+          showToolbar={aiComposer.showToolbar}
+          suggestion={aiComposer.suggestion}
+          isProcessing={aiComposer.isProcessing}
+          activeAction={aiComposer.activeAction}
+          actions={aiComposer.actions}
+          onAction={aiComposer.runAction}
+          onAccept={aiComposer.acceptSuggestion}
+          onReject={aiComposer.rejectSuggestion}
+        />
+      )}
       {aiSuggestions.length > 0 && (
         <Box css={styles.aiSuggestionsContainer}>
           {aiSuggestions.map((s) => (
@@ -807,6 +849,8 @@ const ChatInput = ({ scrollToBottom, clearUnreadDividerRef }) => {
               `text-align: center;`}
             `}
             onChange={onTextChange}
+            onMouseUp={aiComposer.handleMouseUp}
+            onKeyUp={aiComposer.handleKeyUp}
             onBlur={() => {
               sendTypingStop();
               handleBlur();
@@ -915,6 +959,22 @@ const ChatInput = ({ scrollToBottom, clearUnreadDividerRef }) => {
             </Button>
             <Button onClick={textToAttach} type="primary">
               Ok
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      )}
+      {showThreadSummary && (
+        <Modal css={styles.summaryModal} onClose={closeThreadSummary}>
+          <Modal.Header>
+            <Modal.Title>📝 Thread Summary</Modal.Title>
+            <Modal.Close onClick={closeThreadSummary} />
+          </Modal.Header>
+          <Modal.Content css={styles.summaryModalContent}>
+            {threadSummary}
+          </Modal.Content>
+          <Modal.Footer>
+            <Button type="primary" onClick={closeThreadSummary}>
+              Close
             </Button>
           </Modal.Footer>
         </Modal>
