@@ -18,7 +18,12 @@ import {
 import { ChatLayout } from './ChatLayout';
 import { ChatHeader } from './ChatHeader';
 import { RCInstanceProvider } from '../context/RCInstance';
-import { useUserStore, useLoginStore, useMessageStore } from '../store';
+import {
+  useUserStore,
+  useLoginStore,
+  useMessageStore,
+  useAiStore,
+} from '../store';
 import DefaultTheme from '../theme/DefaultTheme';
 import { getTokenStorage } from '../lib/auth';
 import { styles } from './EmbeddedChat.styles';
@@ -27,6 +32,8 @@ import { overrideECProps } from '../lib/overrideECProps';
 
 const EmbeddedChat = (props) => {
   const [remoteOverrides, setRemoteOverrides] = useState({});
+  const generatedTheme = useAiStore((state) => state.generatedTheme);
+  const generatedDark = useAiStore((state) => state.generatedDark);
 
   const config = useMemo(
     () => ({ ...props, ...remoteOverrides }),
@@ -278,12 +285,15 @@ const EmbeddedChat = (props) => {
 
   if (!isSynced) return null;
 
+  const activeTheme = generatedTheme || theme || DefaultTheme;
+  const activeDark = generatedDark !== null ? generatedDark : dark;
+
   return (
-    <ThemeProvider theme={theme || DefaultTheme} mode={dark ? 'dark' : 'light'}>
+    <ThemeProvider theme={activeTheme} mode={activeDark ? 'dark' : 'light'}>
       <RCInstanceProvider value={RCContextValue}>
         <Box
           css={[
-            styles.embeddedchat(theme || DefaultTheme, dark),
+            styles.embeddedchat(activeTheme, activeDark),
             css`
               width: ${width};
               height: ${height};

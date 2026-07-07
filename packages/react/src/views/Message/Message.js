@@ -329,6 +329,7 @@ const Message = ({
                     }}
                     isThreadMessage={type === 'thread'}
                     variantStyles={variantStyles}
+                    aiAdapter={ECOptions?.aiAdapter ?? null}
                   />
                 ) : (
                   <></>
