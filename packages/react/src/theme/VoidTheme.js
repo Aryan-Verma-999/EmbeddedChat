@@ -1,0 +1,88 @@
+const VoidTheme = {
+  radius: '0.125rem',
+
+  commonColors: {
+    black: 'hsl(0, 0%, 0%)',
+    white: 'hsl(0, 0%, 100%)',
+  },
+
+  schemes: {
+    light: {
+      background: 'hsl(0, 0%, 98%)',
+      foreground: 'hsl(262, 30%, 10%)',
+      card: 'hsl(0, 0%, 95%)',
+      cardForeground: 'hsl(262, 30%, 10%)',
+      popover: 'hsl(0, 0%, 100%)',
+      popoverForeground: 'hsl(262, 30%, 10%)',
+      primary: 'hsl(262, 90%, 55%)',
+      primaryForeground: 'hsl(0, 0%, 100%)',
+      secondary: 'hsl(262, 40%, 92%)',
+      secondaryForeground: 'hsl(262, 60%, 30%)',
+      muted: 'hsl(262, 10%, 92%)',
+      mutedForeground: 'hsl(262, 10%, 45%)',
+      accent: 'hsl(262, 60%, 88%)',
+      accentForeground: 'hsl(262, 80%, 30%)',
+      destructive: 'hsl(0, 84%, 60%)',
+      destructiveForeground: 'hsl(0, 0%, 100%)',
+      warning: 'hsl(38, 92%, 50%)',
+      warningForeground: 'hsl(48, 96%, 89%)',
+      success: 'hsl(142, 70%, 40%)',
+      successForeground: 'hsl(0, 0%, 100%)',
+      info: 'hsl(262, 90%, 55%)',
+      infoForeground: 'hsl(262, 40%, 92%)',
+      border: 'hsl(262, 10%, 88%)',
+      input: 'hsl(262, 10%, 88%)',
+      ring: 'hsl(262, 90%, 55%)',
+    },
+
+    dark: {
+      background: 'hsl(220, 13%, 13%)',
+      foreground: 'hsl(220, 15%, 92%)',
+      card: 'hsl(220, 12%, 17%)',
+      cardForeground: 'hsl(220, 15%, 92%)',
+      popover: 'hsl(220, 12%, 18%)',
+      popoverForeground: 'hsl(220, 15%, 92%)',
+      primary: 'hsl(262, 90%, 68%)',
+      primaryForeground: 'hsl(0, 0%, 100%)',
+      secondary: 'hsl(262, 20%, 22%)',
+      secondaryForeground: 'hsl(262, 60%, 80%)',
+      muted: 'hsl(220, 10%, 20%)',
+      mutedForeground: 'hsl(220, 10%, 52%)',
+      accent: 'hsl(262, 35%, 24%)',
+      accentForeground: 'hsl(262, 80%, 80%)',
+      destructive: 'hsl(0, 62%, 38%)',
+      destructiveForeground: 'hsl(220, 15%, 92%)',
+      warning: 'hsl(48, 96%, 89%)',
+      warningForeground: 'hsl(38, 92%, 50%)',
+      success: 'hsl(142, 60%, 35%)',
+      successForeground: 'hsl(220, 15%, 92%)',
+      info: 'hsl(262, 70%, 75%)',
+      infoForeground: 'hsl(262, 30%, 20%)',
+      border: 'hsl(220, 10%, 22%)',
+      input: 'hsl(220, 10%, 22%)',
+      ring: 'hsl(262, 90%, 68%)',
+    },
+  },
+
+  typography: {
+    default: {
+      fontFamily:
+        "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+      fontSize: 14,
+      fontWeightLight: 300,
+      fontWeightRegular: 400,
+      fontWeightMedium: 500,
+      fontWeightBold: 600,
+    },
+    h1: { fontSize: '1.75rem', fontWeight: 700 },
+    h2: { fontSize: '1.375rem', fontWeight: 600 },
+    h3: { fontSize: '1.125rem', fontWeight: 600 },
+    h4: { fontSize: '1rem', fontWeight: 500 },
+    h5: { fontSize: '0.875rem', fontWeight: 400 },
+    h6: { fontSize: '0.75rem', fontWeight: 500 },
+  },
+
+  shadows: ['none', 'none', '0 4px 24px rgba(124, 58, 237, 0.15)'],
+};
+
+export default VoidTheme;

@@ -67,6 +67,7 @@ import FormatText from './FormatText';
 import Cog from './Cog';
 import Team from './Team';
 import Summarize from './Summarize';
+import Sparkles from './Sparkles';
 
 const icons = {
   file: File,
@@ -138,6 +139,7 @@ const icons = {
   'format-text': FormatText,
   cog: Cog,
   summarize: Summarize,
+  sparkles: Sparkles,
 };
 
 export default icons;

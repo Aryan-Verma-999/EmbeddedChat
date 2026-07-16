@@ -75,6 +75,12 @@ const EmbeddedChat = (props) => {
   );
 
   const aiAdapter = props.aiAdapter ?? null;
+  const customSurfaces = props.customSurfaces ?? null;
+
+  const memoizedCustomSurfaces = useMemo(
+    () => customSurfaces,
+    [customSurfaces]
+  );
 
   const hasMounted = useRef(false);
   const { classNames, styleOverrides } = useComponentOverrides('EmbeddedChat');
@@ -257,6 +263,7 @@ const EmbeddedChat = (props) => {
       anonymousMode,
       aiAdapter: memoizedAiAdapter,
       aiAutoReply,
+      customSurfaces: memoizedCustomSurfaces,
     }),
     [
       enableThreads,
@@ -275,6 +282,7 @@ const EmbeddedChat = (props) => {
       anonymousMode,
       memoizedAiAdapter,
       aiAutoReply,
+      memoizedCustomSurfaces,
     ]
   );
 
@@ -360,6 +368,10 @@ EmbeddedChat.propTypes = {
     isAvailable: PropTypes.func.isRequired,
   }),
   aiAutoReply: PropTypes.bool,
+  customSurfaces: PropTypes.shape({
+    contextualBar: PropTypes.arrayOf(PropTypes.object),
+    onAction: PropTypes.func,
+  }),
 };
 
 export default memo(EmbeddedChat);

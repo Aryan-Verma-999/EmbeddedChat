@@ -8,6 +8,26 @@ import { terser } from 'rollup-plugin-terser';
 import replace from '@rollup/plugin-replace';
 import analyze from 'rollup-plugin-analyzer';
 import dts from 'rollup-plugin-dts';
+import path from 'path';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
+const packageJson = require('./package.json');
+
+const makeExternal = (pkg) => {
+  const externals = [
+    ...Object.keys(pkg.dependencies || {}),
+    ...Object.keys(pkg.peerDependencies || {}),
+    'react/jsx-runtime',
+    'react-dom/client'
+  ];
+  return id => {
+    if (id.startsWith('.') || id.startsWith('/') || path.isAbsolute(id)) {
+      return externals.some(dep => id.includes(`/node_modules/${dep}/`) || id.endsWith(`/node_modules/${dep}`));
+    }
+    return externals.some(dep => id === dep || id.startsWith(dep + '/'));
+  };
+};
 
 const PRODUCTION = process.env.NODE_ENV === 'production';
 
@@ -34,7 +54,7 @@ export default [
         plugins: [PRODUCTION && terser()],
       },
     ],
-    external: ['react', 'react-dom', '@emotion/react'],
+    external: makeExternal(packageJson),
     plugins: [
       replace(
         PRODUCTION
@@ -57,7 +77,6 @@ export default [
       }),
       postcss(),
       json(),
-      external(),
       analyze({
         limit: 20,
         summaryOnly: true,

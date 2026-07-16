@@ -31,6 +31,7 @@ import useAttachmentWindowStore from '../../store/attachmentwindow';
 import CheckPreviewType from '../AttachmentPreview/CheckPreviewType';
 import { useRCContext } from '../../context/RCInstance';
 import UiKitContextualBar from '../ContextualBarBlock/uiKit/UiKitContextualBar';
+import CustomContextualBar from './CustomContextualBar';
 import useUiKitStore from '../../store/uiKitStore';
 
 const ChatLayout = () => {
@@ -60,6 +61,19 @@ const ChatLayout = () => {
   const showSearch = useSearchMessageStore((state) => state.showSearch);
   const showChannelinfo = useChannelStore((state) => state.showChannelinfo);
   const showMembers = useMemberStore((state) => state.showMembers);
+  const setCanSendMsg = useUserStore((state) => state.setCanSendMsg);
+  const authenticatedUserId = useUserStore((state) => state.userId);
+  const setShowSidebar = useSidebarStore((state) => state.setShowSidebar);
+
+  useEffect(() => {
+    if (
+      ECOptions?.customSurfaces?.contextualBar &&
+      ECOptions.customSurfaces.contextualBar.length > 0
+    ) {
+      setShowSidebar(true);
+    }
+  }, [ECOptions?.customSurfaces?.contextualBar, setShowSidebar]);
+
   const members = useMemberStore((state) => state.members);
   const showCurrentUserInfo = useUserStore(
     (state) => state.showCurrentUserInfo
@@ -159,20 +173,29 @@ const ChatLayout = () => {
 
       {showSidebar && (
         <Box className="ec-sidebar-view">
-          {showMembers && <RoomMembers members={members} />}
-          {showSearch && <SearchMessages />}
-          {showChannelinfo && <Roominfo />}
-          {showAllThreads && <ThreadedMessages />}
-          {showAllFiles && <FileGallery />}
-          {showMentions && <MentionedMessages />}
-          {showPinned && <PinnedMessages />}
-          {showStarred && <StarredMessages />}
-          {showCurrentUserInfo && <UserInformation />}
-          {uiKitContextualBarOpen && (
-            <UiKitContextualBar
-              key={Math.random()}
-              initialView={uiKitContextualBarData}
+          {ECOptions?.customSurfaces?.contextualBar ? (
+            <CustomContextualBar
+              blocks={ECOptions.customSurfaces.contextualBar}
+              onAction={ECOptions.customSurfaces.onAction}
             />
+          ) : (
+            <>
+              {showMembers && <RoomMembers members={members} />}
+              {showSearch && <SearchMessages />}
+              {showChannelinfo && <Roominfo />}
+              {showAllThreads && <ThreadedMessages />}
+              {showAllFiles && <FileGallery />}
+              {showMentions && <MentionedMessages />}
+              {showPinned && <PinnedMessages />}
+              {showStarred && <StarredMessages />}
+              {showCurrentUserInfo && <UserInformation />}
+              {uiKitContextualBarOpen && (
+                <UiKitContextualBar
+                  key={Math.random()}
+                  initialView={uiKitContextualBarData}
+                />
+              )}
+            </>
           )}
         </Box>
       )}
