@@ -16,7 +16,7 @@ export default defineConfig({
       },
     }),
   ],
-  base: process.env.LAYOUT_EDITOR_BASE_URL || '/EmbeddedChat/layout_editor',
+  base: process.env.LAYOUT_EDITOR_BASE_URL || '/',
   resolve: {
     alias: {
       '@rocket.chat/message-parser': path.resolve(__dirname, '../../node_modules/@rocket.chat/message-parser/dist/messageParser.mjs'),
