@@ -81,7 +81,7 @@ const extractFontFamily = (prompt) => {
   );
 };
 
-// ─── Ollama call ───────────────────────────────────────────────────────────────
+// ─── AI Call handlers ─────────────────────────────────────────────────────────
 const askOllama = async (baseUrl, model, prompt) => {
   const url = `${baseUrl.replace(/\/$/, '')}/api/generate`;
   const res = await fetch(url, {
@@ -92,6 +92,30 @@ const askOllama = async (baseUrl, model, prompt) => {
   if (!res.ok) throw new Error(`Ollama ${res.status}: ${res.statusText}`);
   const data = await res.json();
   return data.response ?? '';
+};
+
+const askGroq = async (apiKey, model, systemPrompt, userPrompt) => {
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: model || 'llama-3.1-8b-instant',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
+      temperature: 0.1,
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.error?.message || `Groq API status ${res.status}`);
+  }
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content ?? '';
 };
 
 const SWATCH_KEYS = [
@@ -105,6 +129,11 @@ const SWATCH_KEYS = [
   { key: 'foreground', label: 'Text' },
 ];
 
+const SYSTEM_PROMPT = `You are a color picker. Based on the user description, return EXACTLY TWO hex color codes separated by a comma:
+1. Primary/brand color
+2. Accent/secondary color
+Return ONLY the two hex codes like: #3b82f6, #f59e0b — no markdown code block, no explanation, no other text.`;
+
 // ─── Component ─────────────────────────────────────────────────────────────────
 const AIThemePanel = () => {
   const { theme, mode, setTheme, setMode } = useTheme();
@@ -112,30 +141,42 @@ const AIThemePanel = () => {
   const dispatchToastMessage = useToastBarDispatch();
 
   const [open, setOpen] = useState(false);
+  const [provider, setProvider] = useState(
+    () => localStorage.getItem('ec_ai_provider') || 'ollama'
+  );
   const [baseUrl, setBaseUrl] = useState('http://localhost:11434');
   const [modelName, setModelName] = useState('qwen2.5:3b');
+  const [groqKey, setGroqKey] = useState(
+    () => localStorage.getItem('ec_groq_key') || ''
+  );
+  const [groqModel, setGroqModel] = useState(
+    () => localStorage.getItem('ec_groq_model') || 'llama-3.1-8b-instant'
+  );
   const [prompt, setPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [appliedScheme, setAppliedScheme] = useState(null);
   const originalThemeRef = useRef(null);
 
-  const buildPrompt = (userPrompt) =>
-    `You are a color picker. Based on this description, return EXACTLY TWO hex color codes separated by a comma:
-1. Primary/brand color
-2. Accent/secondary color
-Return ONLY the two hex codes like: #3b82f6, #f59e0b — no explanation.
-Description: "${userPrompt}"`;
-
   const handleGenerate = useCallback(async () => {
     if (!prompt.trim() || isGenerating) return;
+    if (provider === 'groq' && !groqKey.trim()) {
+      dispatchToastMessage({
+        type: 'error',
+        message: 'Groq API Key is required.',
+      });
+      return;
+    }
     if (!originalThemeRef.current) originalThemeRef.current = theme;
     setIsGenerating(true);
     try {
-      const aiResponse = await askOllama(
-        baseUrl,
-        modelName,
-        buildPrompt(prompt)
-      );
+      let aiResponse = '';
+      if (provider === 'groq') {
+        aiResponse = await askGroq(groqKey, groqModel, SYSTEM_PROMPT, prompt);
+      } else {
+        const fullPrompt = `${SYSTEM_PROMPT}\nUser description: "${prompt}"`;
+        aiResponse = await askOllama(baseUrl, modelName, fullPrompt);
+      }
+
       const [primaryHex, accentHex] = extractTwoHexColors(aiResponse);
       if (!primaryHex) throw new Error('No color found in AI response');
 
@@ -177,6 +218,9 @@ Description: "${userPrompt}"`;
     }
   }, [
     prompt,
+    provider,
+    groqKey,
+    groqModel,
     baseUrl,
     modelName,
     isGenerating,
@@ -184,6 +228,7 @@ Description: "${userPrompt}"`;
     mode,
     setTheme,
     setMode,
+    dispatchToastMessage,
   ]);
 
   const handleReset = useCallback(() => {
@@ -193,7 +238,7 @@ Description: "${userPrompt}"`;
     }
     setAppliedScheme(null);
     dispatchToastMessage({ type: 'success', message: 'Theme reset.' });
-  }, [setTheme]);
+  }, [setTheme, dispatchToastMessage]);
 
   const currentScheme = appliedScheme ?? null;
 
@@ -217,29 +262,82 @@ Description: "${userPrompt}"`;
       {/* ── Body ── */}
       {open && (
         <Box css={styles.body}>
-          {/* Ollama URL */}
+          {/* AI Provider selector */}
           <Box>
-            <span css={styles.fieldLabel}>Ollama base URL</span>
-            <input
+            <span css={styles.fieldLabel}>AI Provider</span>
+            <select
               css={styles.input}
-              value={baseUrl}
-              onChange={(e) => setBaseUrl(e.target.value)}
-              placeholder="http://localhost:11434"
-              aria-label="Ollama base URL"
-            />
+              value={provider}
+              onChange={(e) => {
+                setProvider(e.target.value);
+                localStorage.setItem('ec_ai_provider', e.target.value);
+              }}
+            >
+              <option value="ollama">Local (Ollama)</option>
+              <option value="groq">Cloud (Groq)</option>
+            </select>
           </Box>
 
-          {/* Model */}
-          <Box>
-            <span css={styles.fieldLabel}>Model</span>
-            <input
-              css={styles.input}
-              value={modelName}
-              onChange={(e) => setModelName(e.target.value)}
-              placeholder="qwen2.5:3b"
-              aria-label="Model name"
-            />
-          </Box>
+          {provider === 'ollama' ? (
+            <>
+              {/* Ollama URL */}
+              <Box>
+                <span css={styles.fieldLabel}>Ollama base URL</span>
+                <input
+                  css={styles.input}
+                  value={baseUrl}
+                  onChange={(e) => setBaseUrl(e.target.value)}
+                  placeholder="http://localhost:11434"
+                  aria-label="Ollama base URL"
+                />
+              </Box>
+
+              {/* Model */}
+              <Box>
+                <span css={styles.fieldLabel}>Model</span>
+                <input
+                  css={styles.input}
+                  value={modelName}
+                  onChange={(e) => setModelName(e.target.value)}
+                  placeholder="qwen2.5:3b"
+                  aria-label="Model name"
+                />
+              </Box>
+            </>
+          ) : (
+            <>
+              {/* Groq API Key */}
+              <Box>
+                <span css={styles.fieldLabel}>Groq API Key</span>
+                <input
+                  type="password"
+                  css={styles.input}
+                  value={groqKey}
+                  onChange={(e) => {
+                    setGroqKey(e.target.value);
+                    localStorage.setItem('ec_groq_key', e.target.value);
+                  }}
+                  placeholder="gsk_..."
+                  aria-label="Groq API Key"
+                />
+              </Box>
+
+              {/* Groq Model */}
+              <Box>
+                <span css={styles.fieldLabel}>Groq Model</span>
+                <input
+                  css={styles.input}
+                  value={groqModel}
+                  onChange={(e) => {
+                    setGroqModel(e.target.value);
+                    localStorage.setItem('ec_groq_model', e.target.value);
+                  }}
+                  placeholder="llama-3.1-8b-instant"
+                  aria-label="Groq Model"
+                />
+              </Box>
+            </>
+          )}
 
           {/* Prompt */}
           <Box>

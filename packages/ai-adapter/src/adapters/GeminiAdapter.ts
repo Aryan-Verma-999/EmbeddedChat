@@ -1,3 +1,4 @@
+import { LayoutBlock } from "@rocket.chat/ui-kit";
 import { BaseAIAdapter } from "../BaseAIAdapter";
 import { AIContext, AIResponse } from "../types";
 
@@ -97,6 +98,13 @@ export class GeminiAdapter extends BaseAIAdapter {
     const data = await res.json();
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
     return { text };
+  }
+
+  async generateUIBlocks(
+    prompt: string,
+    existingBlocks?: LayoutBlock[]
+  ): Promise<{ blocks: LayoutBlock[]; componentType: string }> {
+    throw new Error("generateUIBlocks not implemented for Gemini adapter");
   }
 
   async isAvailable(): Promise<boolean> {

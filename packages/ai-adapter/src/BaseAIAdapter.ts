@@ -1,8 +1,13 @@
+import { LayoutBlock } from "@rocket.chat/ui-kit";
 import { IAIAdapter, AIContext, AIResponse, Message } from "./types";
 
 export abstract class BaseAIAdapter implements IAIAdapter {
   abstract name: string;
   abstract sendPrompt(context: AIContext, message: string): Promise<AIResponse>;
+  abstract generateUIBlocks(
+    prompt: string,
+    existingBlocks?: LayoutBlock[]
+  ): Promise<{ blocks: LayoutBlock[]; componentType: string }>;
   abstract isAvailable(): Promise<boolean>;
 
   async getSuggestions(

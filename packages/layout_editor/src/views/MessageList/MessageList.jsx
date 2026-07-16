@@ -1,14 +1,15 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { css } from "@emotion/react";
-import { isSameDay } from "date-fns";
-import { Box, Icon } from "@embeddedchat/ui-elements";
-import Message from "../Message/Message";
-import isMessageLastSequential from "../../lib/isMessageLastSequential";
-import isMessageSequential from "../../lib/isMessageSequential";
-import messages from "../../data/messages.json";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { css } from '@emotion/react';
+import { isSameDay } from 'date-fns';
+import { Box, Icon } from '@embeddedchat/ui-elements';
+import Message from '../Message/Message';
+import isMessageLastSequential from '../../lib/isMessageLastSequential';
+import isMessageSequential from '../../lib/isMessageSequential';
+import useLayoutStore from '../../store/layoutStore';
 
 const MessageList = () => {
+  const messages = useLayoutStore((state) => state.messages);
   const isMessageNewDay = (current, previous) =>
     !previous || !isSameDay(new Date(current.ts), new Date(previous.ts));
 

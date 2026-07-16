@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import initialMessages from '../data/messages.json';
 
 const useLayoutStore = create((set) => ({
   themeLabOpen: false,
@@ -19,6 +20,14 @@ const useLayoutStore = create((set) => ({
   sidebarWidth: '350px',
   setSidebarWidth: (sidebarWidth) => {
     set({ sidebarWidth });
+  },
+
+  messages: initialMessages,
+  setMessages: (messages) => {
+    set({ messages });
+  },
+  addMessage: (msg) => {
+    set((state) => ({ messages: [msg, ...state.messages] }));
   },
 }));
 

@@ -12,6 +12,8 @@ const Markdown = ({ body }) => {
     return { members, username };
   }, [username]);
 
+  if (!body || !body.md) return null;
+
   return (
     <Box>
       <MarkupInteractionContext.Provider value={value}>

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Heading, Box, Icon, useTheme } from '@embeddedchat/ui-elements';
+import { Heading, Box, Icon, useTheme, ActionButton, Tooltip } from '@embeddedchat/ui-elements';
 import { getChatHeaderStyles } from './ChatHeader.styles';
 import { Menu } from '../../components/SortableMenu';
 import SurfaceItem from '../../components/SurfaceMenu/SurfaceItem';
@@ -17,6 +17,9 @@ import { createPortal } from 'react-dom';
 import MenuItem from '../../components/SortableMenu/MenuItem';
 import SurfaceMenu from '../../components/SurfaceMenu/SurfaceMenu';
 import useHeaderItemsStore from '../../store/headerItemsStore';
+import useAiGeneratedBlocksStore from '../../store/aiGeneratedBlocksStore';
+import PreviewErrorBoundary from '../../components/PreviewErrorBoundary';
+import { UiKitMessage, UiKitModal, UiKitContextualBar } from '@embeddedchat/ui-kit';
 
 const ChatHeader = () => {
   const styles = getChatHeaderStyles(useTheme());
@@ -30,6 +33,7 @@ const ChatHeader = () => {
 
   const [activeSurfaceItem, setActiveSurfaceItem] = useState(null);
   const [activeMenuItem, setActiveMenuItem] = useState(null);
+  const [openSection, setOpenSection] = useState(null);
 
   const placeholderSurfaceItem = 'placeholder-surface';
   const placeholderMenuItem = 'placeholder-menu';
@@ -259,7 +263,7 @@ const ChatHeader = () => {
           onDragEnd={handleDragEnd}
           onDragStart={handleDragStart}
         >
-          <Box css={styles.chatHeaderIconRow}>
+          <Box css={styles.chatHeaderIconRow} style={{ position: 'relative' }}>
             {surfaceOptions.length > 0 && (
               <SurfaceMenu
                 options={surfaceOptions}
@@ -269,6 +273,7 @@ const ChatHeader = () => {
             {menuOptions.length > 0 && (
               <Menu options={menuOptions} onRemove={removeMenuItem} />
             )}
+
           </Box>
           {createPortal(
             <DragOverlay zIndex={1700}>
