@@ -400,6 +400,11 @@ const ChatBody = ({
           ...styleOverrides,
         }}
         className={`ec-chat-body ${classNames}`}
+        role="log"
+        aria-live="polite"
+        aria-relevant="additions text"
+        aria-atomic="false"
+        aria-label="Message list"
       >
         {isLoginIn ? (
           <Box

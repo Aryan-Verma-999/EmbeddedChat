@@ -150,6 +150,11 @@ const AttachmentMetadata = ({
               icon={isExpanded ? 'chevron-down' : 'chevron-left'}
               size="small"
               onClick={onExpandCollapseClick}
+              aria-label={
+                isExpanded
+                  ? 'Collapse attachment details'
+                  : 'Expand attachment details'
+              }
             />
           </Tooltip>
           <Tooltip text="Download" position="top">
@@ -158,6 +163,7 @@ const AttachmentMetadata = ({
               icon="download"
               size="small"
               onClick={handleDownload}
+              aria-label="Download attachment"
             />
           </Tooltip>
         </Box>

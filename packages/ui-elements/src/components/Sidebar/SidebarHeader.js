@@ -15,7 +15,12 @@ const SidebarHeader = ({ title, iconName, avatarUrl, onClose = () => {} }) => (
         {title}
       </Heading>
     </Box>
-    <ActionButton onClick={onClose} ghost size="small">
+    <ActionButton
+      onClick={onClose}
+      ghost
+      size="small"
+      aria-label={`Close ${title || 'sidebar'}`}
+    >
       <Icon name="cross" />
     </ActionButton>
   </Box>

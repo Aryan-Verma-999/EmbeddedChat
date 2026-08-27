@@ -45,6 +45,7 @@ const QuoteMessage = ({ className = '', style = {}, message }) => {
           ghost
           onClick={() => removeQuoteMessage(message)}
           size="small"
+          aria-label="Remove quoted message"
         >
           <Icon name="cross" size="0.75rem" />
         </ActionButton>

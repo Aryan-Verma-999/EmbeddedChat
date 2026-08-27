@@ -214,6 +214,7 @@ export const MessageAggregator = ({
                         square
                         ghost
                         onClick={() => setJumpToMessage(msg)}
+                        aria-label="Jump to message"
                         css={{
                           position: 'relative',
                           zIndex: 10,

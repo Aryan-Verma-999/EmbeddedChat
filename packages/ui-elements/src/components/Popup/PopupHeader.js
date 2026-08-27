@@ -71,7 +71,12 @@ export const PopupHeader = ({
         )}
       </Box>
 
-      <ActionButton onClick={() => onClose()} ghost size="small">
+      <ActionButton
+        onClick={() => onClose()}
+        ghost
+        size="small"
+        aria-label={`Close ${title || 'popup'}`}
+      >
         <Icon name="cross" />
       </ActionButton>
     </Box>

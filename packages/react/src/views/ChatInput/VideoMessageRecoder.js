@@ -169,10 +169,13 @@ const VideoMessageRecorder = (props) => {
       {state === 'idle' &&
         (displayName ? (
           <Box
+            is="button"
+            type="button"
             key="video"
             css={popOverItemStyles}
             onClick={openWindowToRecord}
             disabled={disabled}
+            aria-label="Record video message"
           >
             <Icon name="video-recorder" size="1rem" />
             <span>{displayName}</span>
@@ -183,6 +186,7 @@ const VideoMessageRecorder = (props) => {
               ghost
               square
               disabled={disabled}
+              aria-label="Record video message"
               onClick={openWindowToRecord}
             >
               <Icon size="1.25rem" name="video-recorder" />
@@ -192,7 +196,7 @@ const VideoMessageRecorder = (props) => {
 
       {state === 'preview' && (
         <>
-          <ActionButton ghost square>
+          <ActionButton ghost square aria-label="Video recording unavailable">
             <Icon size="1.25rem" name="disabled-recorder" />
           </ActionButton>
           <Modal
@@ -219,6 +223,11 @@ const VideoMessageRecorder = (props) => {
                 >
                   <ActionButton
                     ghost
+                    aria-label={
+                      isRecording
+                        ? 'Stop video recording'
+                        : 'Start video recording'
+                    }
                     onClick={
                       isRecording ? handleStopRecording : handleStartRecording
                     }
@@ -232,7 +241,12 @@ const VideoMessageRecorder = (props) => {
                     />
                   </ActionButton>
                 </Tooltip>
-                <Box css={styles.record}>
+                <Box
+                  css={styles.record}
+                  role="timer"
+                  aria-live="off"
+                  aria-label={`Recording time: ${time}`}
+                >
                   <Box
                     is="span"
                     css={isRecording ? styles.dot : styles.oppositeDot}
@@ -244,7 +258,9 @@ const VideoMessageRecorder = (props) => {
               <Box css={styles.spacer} />
 
               <Box css={styles.rightSection}>
-                <Button onClick={closeWindowStopRecord}>Cancel</Button>
+                <Button onClick={closeWindowStopRecord}>
+                  Cancel recording
+                </Button>
                 <Button
                   onClick={handleSendRecording}
                   disabled={isSendDisabled}

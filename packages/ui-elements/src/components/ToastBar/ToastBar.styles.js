@@ -30,7 +30,13 @@ export const getToastbarStyles = (theme) => {
       border-radius: ${theme.radius};
       padding: 0.75em 1em;
       z-index: ${theme.zIndex?.toastbar || 1600};
-      animation: ${animation} ${time}ms ease-in-out forwards;
+      animation: ${time
+        ? `${animation} ${time}ms ease-in-out forwards`
+        : 'none'};
+
+      @media (prefers-reduced-motion: reduce) {
+        animation: none;
+      }
     `,
   };
 

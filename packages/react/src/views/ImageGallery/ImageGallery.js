@@ -48,6 +48,7 @@ const ImageGallery = ({ currentFileId, setShowGallery }) => {
           css={styles.exit}
           onClick={() => setShowGallery(false)}
           size="medium"
+          aria-label="Close image gallery"
         >
           <Icon name="cross" />
         </ActionButton>

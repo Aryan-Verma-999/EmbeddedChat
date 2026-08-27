@@ -792,6 +792,11 @@ const ChatInput = ({ scrollToBottom, clearUnreadDividerRef }) => {
           <Box
             is="div"
             role="textbox"
+            aria-label={
+              isUserAuthenticated
+                ? `Message ${channelInfo.name || 'channel'}`
+                : 'Sign in to chat'
+            }
             aria-multiline="true"
             aria-disabled={
               !isUserAuthenticated ||
@@ -846,6 +851,7 @@ const ChatInput = ({ scrollToBottom, clearUnreadDividerRef }) => {
                   type="primary"
                   disabled={disableButton || isRecordingMessage}
                   icon="send"
+                  aria-label="Send message"
                 />
               ) : null
             ) : (

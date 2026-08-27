@@ -49,6 +49,10 @@ const LinkPreview = ({
             display="inline"
             square
             size="small"
+            aria-label={
+              isPreviewOpen ? 'Collapse link preview' : 'Expand link preview'
+            }
+            aria-expanded={isPreviewOpen}
           >
             {isPreviewOpen ? (
               <Icon name="chevron-left" size="1.25rem" />

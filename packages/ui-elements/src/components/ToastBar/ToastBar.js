@@ -9,7 +9,10 @@ import { getToastbarStyles } from './ToastBar.styles';
 import useTheme from '../../hooks/useTheme';
 
 const ToastBar = ({ toast, onClose }) => {
-  const { type, message, time = 2000 } = toast;
+  const { type, message, persistent = false, time = 5000 } = toast;
+  const isPersistent =
+    persistent || type === 'error' || type === 'warning' || time <= 0;
+  const autoCloseTime = isPersistent ? null : time;
   const toastRef = useRef();
   const latestOnClose = useRef(onClose);
   const { theme } = useTheme();
@@ -47,22 +50,35 @@ const ToastBar = ({ toast, onClose }) => {
   }, [onClose]);
 
   useEffect(() => {
+    if (isPersistent) {
+      return undefined;
+    }
+
     const timer = setTimeout(() => {
       latestOnClose.current?.();
-    }, time);
+    }, autoCloseTime);
     return () => clearTimeout(timer);
-  }, [time]);
+  }, [autoCloseTime, isPersistent]);
 
   return (
     <Box
       ref={toastRef}
-      css={styles.toastbar(color, bgColor, time)}
+      css={styles.toastbar(color, bgColor, autoCloseTime)}
       className={appendClassNames('ec-toast-bar', classNames)}
       style={styleOverrides}
+      role={type === 'error' ? 'alert' : 'status'}
+      aria-live={type === 'error' ? 'assertive' : 'polite'}
+      aria-atomic="true"
     >
       <Icon size="1em" name={iconName} />
       {message}
-      <ActionButton icon="cross" size="small" onClick={onClose} ghost />
+      <ActionButton
+        icon="cross"
+        size="small"
+        onClick={onClose}
+        ghost
+        aria-label="Dismiss notification"
+      />
     </Box>
   );
 };

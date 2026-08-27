@@ -72,7 +72,12 @@ const InviteMembers = () => {
               Invite Members
             </Heading>
 
-            <ActionButton onClick={() => toggleInviteView()} ghost size="small">
+            <ActionButton
+              onClick={() => toggleInviteView()}
+              ghost
+              size="small"
+              aria-label="Back to members"
+            >
               <Icon name="back" size="1.25rem" />
             </ActionButton>
           </Box>
@@ -82,7 +87,12 @@ const InviteMembers = () => {
               <Box is="span">
                 <b>Invite Link</b>
               </Box>
-              <ActionButton onClick={copyToClipboard} ghost size="small">
+              <ActionButton
+                onClick={copyToClipboard}
+                ghost
+                size="small"
+                aria-label="Copy invite link"
+              >
                 <Icon name="copy" size="1.25rem" />
               </ActionButton>
             </Box>

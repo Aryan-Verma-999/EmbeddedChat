@@ -131,6 +131,7 @@ const ChatInputFormattingToolbar = ({
             square
             ghost
             disabled={isRecordingMessage}
+            aria-label="Insert emoji"
             onClick={() => {
               if (isRecordingMessage) return;
               openEmojiPicker();
@@ -181,6 +182,7 @@ const ChatInputFormattingToolbar = ({
             square
             ghost
             disabled={isRecordingMessage}
+            aria-label="Upload file"
             onClick={() => {
               if (isRecordingMessage) return;
               handleClickToOpenFiles();
@@ -211,6 +213,7 @@ const ChatInputFormattingToolbar = ({
             square
             ghost
             disabled={isRecordingMessage}
+            aria-label="Insert link"
             onMouseDown={(event) => event.preventDefault()}
             onClick={() => {
               if (isRecordingMessage) return;
@@ -253,6 +256,7 @@ const ChatInputFormattingToolbar = ({
               square
               disabled={isRecordingMessage}
               ghost
+              aria-label={`Format ${item.name}`}
               onClick={() => {
                 if (isRecordingMessage) return;
                 formatSelection(messageRef, item.pattern);
@@ -335,6 +339,7 @@ const ChatInputFormattingToolbar = ({
                   square
                   disabled={isRecordingMessage}
                   ghost
+                  aria-label={`Format ${itemInFormatter.name}`}
                   onClick={() =>
                     formatSelection(messageRef, itemInFormatter.pattern)
                   }
@@ -356,6 +361,9 @@ const ChatInputFormattingToolbar = ({
               square
               ghost
               disabled={isRecordingMessage}
+              aria-label="More formatting options"
+              aria-expanded={isPopoverOpen}
+              aria-haspopup="menu"
               onClick={() => {
                 if (isRecordingMessage) return;
                 setPopoverOpen(!isPopoverOpen);
